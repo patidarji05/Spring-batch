@@ -65,7 +65,7 @@ public class SampleJob {
 				.writer(firstItemWriter).build();
 	}
 
-	// @Bean
+	 @Bean
 	public Job firstJob() {
 		return jobBuilderFactory.get("First Job").incrementer(new RunIdIncrementer()).start(firstStep())
 				.next(secondStep()).listener(firstJobListner).build();
