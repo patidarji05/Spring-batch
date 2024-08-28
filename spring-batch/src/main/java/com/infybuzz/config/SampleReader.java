@@ -11,6 +11,7 @@ import org.springframework.batch.core.configuration.annotation.StepBuilderFactor
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.item.ItemWriter;
+import org.springframework.batch.item.adapter.ItemReaderAdapter;
 import org.springframework.batch.item.database.JdbcCursorItemReader;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper;
@@ -31,7 +32,9 @@ import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import com.infybuzz.model.StudentCsv;
 import com.infybuzz.model.StudentJdbc;
 import com.infybuzz.model.StudentJson;
+import com.infybuzz.model.StudentResponse;
 import com.infybuzz.model.StudentXml;
+import com.infybuzz.service.StudentService;
 
 /*
  * This  config file is used to read data from CSV , Json, xml, db file 
@@ -44,6 +47,9 @@ public class SampleReader {
 
 	@Autowired
 	private StepBuilderFactory stepBuilderFactory;
+	
+	@Autowired
+	private StudentService studentService;
 
 	@Autowired
 	@Qualifier("dataSource")
@@ -53,7 +59,7 @@ public class SampleReader {
 	@Qualifier("userDataSource")
 	private DataSource userDataSource;
 
-	@Bean
+	//@Bean
 	public Job chunkJob() {
 
 		return jobBuilderFactory.get("Chunk Job").incrementer(new RunIdIncrementer()).start(firstChunkStep()).build();
@@ -61,13 +67,29 @@ public class SampleReader {
 	}
 
 	public Step firstChunkStep() {
-		return stepBuilderFactory.get("First Chunk Step").<StudentJdbc, StudentJdbc>chunk(3)
+		return stepBuilderFactory.get("First Chunk Step").<StudentResponse, StudentResponse>chunk(3)
 				// .reader(flateFileItemReader(null))
 				// .reader(jsonItemReader(null))
 				// .reader(staxEventItemReader(null))
-				.reader(jdbcCursorItemReader())
+			//	.reader(jdbcCursorItemReader())
+				.reader(itemReaderAdapter())
 				// .processor(firstItemProcesser)
 				.writer(itemWriter()).build();
+	}
+	
+	
+	
+	
+	// read data from url 
+	
+	public ItemReaderAdapter<StudentResponse> itemReaderAdapter(){
+		ItemReaderAdapter<StudentResponse> itemReaderAdapter = new ItemReaderAdapter<StudentResponse>();
+		itemReaderAdapter.setTargetObject(studentService);
+		itemReaderAdapter.setTargetMethod("StudentResponse");
+		itemReaderAdapter.setArguments(new Object[] {
+				1l,"charlotte.lopez@x.dummyjson.com"
+		});
+		return itemReaderAdapter;
 	}
 
 	// read jaba from db
@@ -177,12 +199,12 @@ public class SampleReader {
 		return flatFileItemReader;
 	}
 
-	public ItemWriter<StudentJdbc> itemWriter() {
+	public ItemWriter<StudentResponse> itemWriter() {
 
-		return new ItemWriter<StudentJdbc>() {
+		return new ItemWriter<StudentResponse>() {
 
 			@Override
-			public void write(List<? extends StudentJdbc> items) throws Exception {
+			public void write(List<? extends StudentResponse> items) throws Exception {
 				System.out.println("Inside the item reader");
 				items.stream().forEach(System.out::println);
 
