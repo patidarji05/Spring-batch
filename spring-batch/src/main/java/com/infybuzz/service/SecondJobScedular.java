@@ -23,7 +23,7 @@ public class SecondJobScedular {
 	@Autowired
 	Job seconJob;
 
-	@Scheduled(cron = "0 0/1 * 1/1 * ?")
+	//@Scheduled(cron = "0 0/1 * 1/1 * ?")
 	public void secondJobStarter() {
 		Map<String, JobParameter> parms = new HashMap<>();
 		parms.put("currentime", new JobParameter(System.currentTimeMillis()));
