@@ -2,6 +2,7 @@ package com.infybuzz.config;
 
 import java.util.List;
 
+import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
 import org.springframework.batch.core.Job;
@@ -58,6 +59,21 @@ public class SampleReader {
 	@Autowired
 	@Qualifier("userDataSource")
 	private DataSource userDataSource;
+	
+	@Autowired
+	@Qualifier("postgresdatasource")
+	private DataSource postgresdatasource;
+	
+	
+	
+	@Autowired
+	@Qualifier("postgressqlEntityManagerFactory")
+	private EntityManagerFactory postgressqlEntityManagerFactory;
+	
+	
+	@Autowired
+	@Qualifier
+	private EntityManagerFactory mysqlEntityManagerFactory;
 
 	//@Bean
 	public Job chunkJob() {
