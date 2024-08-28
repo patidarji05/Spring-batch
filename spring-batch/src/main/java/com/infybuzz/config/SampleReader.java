@@ -16,17 +16,20 @@ import org.springframework.batch.item.file.mapping.DefaultLineMapper;
 import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
 import org.springframework.batch.item.json.JacksonJsonObjectReader;
 import org.springframework.batch.item.json.JsonItemReader;
+import org.springframework.batch.item.xml.StaxEventItemReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
 import com.infybuzz.model.StudentCsv;
 import com.infybuzz.model.StudentJson;
+import com.infybuzz.model.StudentXml;
 
 /*
- * This  config file is used to read data from CSV , Json file 
+ * This  config file is used to read data from CSV , Json, xml file 
  */
 @Configuration
 public class SampleReader {
@@ -48,13 +51,37 @@ public class SampleReader {
 
 	public Step firstChunkStep() {
 		return stepBuilderFactory.get("First Chunk Step")
-				.<StudentJson, StudentJson>chunk(3)
+				.<StudentXml, StudentXml>chunk(3)
 			//	.reader(flateFileItemReader(null))
-				.reader(jsonItemReader(null))
+				//.reader(jsonItemReader(null))
+				.reader(staxEventItemReader(null))
 				// .processor(firstItemProcesser)
 				.writer(itemWriter()).build();
 	}
 
+	
+	
+	// read the data form xml file 
+	
+	@StepScope
+	@Bean
+	public StaxEventItemReader<StudentXml> staxEventItemReader(@Value("#{jobParameters['inputFile']}") FileSystemResource fileSystemResource){
+		
+		StaxEventItemReader<StudentXml> staxEventItemReader = new StaxEventItemReader<>();
+		staxEventItemReader.setResource(fileSystemResource);
+		staxEventItemReader.setFragmentRootElementName("student");
+		staxEventItemReader.setUnmarshaller(new Jaxb2Marshaller() {
+			{
+				setClassesToBeBound(StudentXml.class);
+			}
+		});
+		
+		return staxEventItemReader;
+	}
+	
+	
+	
+	
 	
 	// read tha data from json file 
 	@StepScope
@@ -72,19 +99,6 @@ public class SampleReader {
 		return jsonItemReader;
 		
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 	
 	
 	// read value from jobparameter
@@ -136,12 +150,12 @@ public class SampleReader {
 		return flatFileItemReader;
 	}
 
-	public ItemWriter<StudentJson> itemWriter() {
+	public ItemWriter<StudentXml> itemWriter() {
 
-		return new ItemWriter<StudentJson>() {
+		return new ItemWriter<StudentXml>() {
 
 			@Override
-			public void write(List<? extends StudentJson> items) throws Exception {
+			public void write(List<? extends StudentXml> items) throws Exception {
 				System.out.println("Inside the item reader");
 				items.stream().forEach(System.out::println);
 
