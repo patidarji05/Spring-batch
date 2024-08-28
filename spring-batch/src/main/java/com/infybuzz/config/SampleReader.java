@@ -20,9 +20,8 @@ import org.springframework.batch.item.json.JacksonJsonObjectReader;
 import org.springframework.batch.item.json.JsonItemReader;
 import org.springframework.batch.item.xml.StaxEventItemReader;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResource;
@@ -46,10 +45,13 @@ public class SampleReader {
 	@Autowired
 	private StepBuilderFactory stepBuilderFactory;
 
-	 @Autowired
-	 private DataSource dataSource;
+	@Autowired
+	@Qualifier("dataSource")
+	private DataSource dataSource;
 
-	
+	@Autowired
+	@Qualifier("userDataSource")
+	private DataSource userDataSource;
 
 	@Bean
 	public Job chunkJob() {
@@ -73,7 +75,7 @@ public class SampleReader {
 	public JdbcCursorItemReader<StudentJdbc> jdbcCursorItemReader() {
 		JdbcCursorItemReader<StudentJdbc> jdbcCursorItemReader = new JdbcCursorItemReader<>();
 
-		jdbcCursorItemReader.setDataSource(dataSource);
+		jdbcCursorItemReader.setDataSource(userDataSource);
 		jdbcCursorItemReader.setSql("select id, first_name as firstName, last_name as lastName, email from student");
 
 		jdbcCursorItemReader.setRowMapper(new BeanPropertyRowMapper<StudentJdbc>() {
