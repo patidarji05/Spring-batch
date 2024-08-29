@@ -9,6 +9,7 @@ import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 
@@ -35,6 +36,7 @@ public class DataSourceConfig {
 	}
 	
 	@Bean
+	@Primary
 	public EntityManagerFactory postgressqlEntityManagerFactory() {
 		LocalContainerEntityManagerFactoryBean lem = new LocalContainerEntityManagerFactoryBean();
 		lem.setDataSource(postgresdatasource());
@@ -56,6 +58,16 @@ public class DataSourceConfig {
 		lem.afterPropertiesSet();
 		return lem.getObject();
 		
+	}
+	
+	@Bean
+	@Primary
+	public JpaTransactionManager jpaTransactionManager() {
+		JpaTransactionManager jpaTransactionManager = new JpaTransactionManager();
+		jpaTransactionManager.setDataSource(userDataSource());
+		jpaTransactionManager.setEntityManagerFactory(mysqlEntityManagerFactory());
+		
+		return jpaTransactionManager;
 	}
 
 }

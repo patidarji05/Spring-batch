@@ -64,16 +64,6 @@ public class SampleReader {
 	@Qualifier("postgresdatasource")
 	private DataSource postgresdatasource;
 	
-	
-	
-	@Autowired
-	@Qualifier("postgressqlEntityManagerFactory")
-	private EntityManagerFactory postgressqlEntityManagerFactory;
-	
-	
-	@Autowired
-	@Qualifier
-	private EntityManagerFactory mysqlEntityManagerFactory;
 
 	//@Bean
 	public Job chunkJob() {
